@@ -180,7 +180,7 @@ def aircon_check_cur_temp():
         request_data = request.get_json()
 
         # Extract parameters from request_data
-        output_dict = {'curTemp': str(round(random.uniform(18.0, 28.0)), 1)}
+        output_dict = {'curTemp': str(round(random.uniform(18.0, 30.0), 1))} # round(random.uniform(18.0, 28.0)), 1
         response_data = {
             "version": "2.0",
             "resultCode": "OK",
@@ -305,14 +305,14 @@ def aircon_turn_on():
         try:
             client_socket = socket(AF_INET, SOCK_STREAM)
             client_socket.connect(backendServer)
-            client_socket.send(json.dumps(action_parameters).encode() + b'\n')  # Convert to bytes and add newline
+            client_socket.send(json.dumps(request_data).encode() + b'\n')  # Convert to bytes and add newline
             client_socket.close()
         except Exception as e:
             print(f"Failed to connect backend server: {str(e)}")
 
         # Extract parameters from request_data
         init_temp_parameters = action_parameters.get('initTemp', {})
-        output_dict = {'initTemp': init_temp_parameters['value']}
+        output_dict = {'initTemp': str(init_temp_parameters['value'])}
         response_data = {
             "version": "2.0",
             "resultCode": "OK",
