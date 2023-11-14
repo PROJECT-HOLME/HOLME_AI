@@ -1,29 +1,31 @@
-from socket import *
+import socket
+import threading
+import json
 
-serverName = 'localhost'
-serverPort = 9000
+frontend_server_address = ('localhost', 9000)
 
-serverSocket = socket(AF_INET, SOCK_STREAM)
-serverSocket.bind((serverName, serverPort))
-serverSocket.listen(1)
+def handle_client(client_socket):
+    try:
+        data = client_socket.recv(1024).decode()
+        json_data = json.loads(data)
+        print("Received data from Flask server:", json_data)
 
-print('Server is ready to receive...')
+    except Exception as e:
+        print("Error handling client:", str(e))
+    finally:
+        client_socket.close()
 
-while True:
-    connectionSocket, addr = serverSocket.accept()
-    print('Connected by', addr)
+def start_tcp_server():
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
+        server_socket.bind(frontend_server_address)
+        server_socket.listen()
 
-    # Receive data from NUGU Server
-    data = b''
-    while True:
-        chunk = connectionSocket.recv(1024)
-        if not chunk:
-            break
-        data += chunk
-        if b'\n' in chunk:
-            break  # Break the loop when newline character is received
+        print(f"TCP server listening on {frontend_server_address}")
 
-    # Print recieved data from NUGU Server
-    received_data = data.decode().strip()
-    print('Received from client:', received_data)
-    connectionSocket.close()
+        while True:
+            client_socket, _ = server_socket.accept()
+            client_handler = threading.Thread(target=handle_client, args=(client_socket,))
+            client_handler.start()
+
+if __name__ == '__main__':
+    start_tcp_server()
