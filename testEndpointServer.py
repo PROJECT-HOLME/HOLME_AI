@@ -1,3 +1,4 @@
+# test server to print data sent by endpointServer.py
 from flask import Flask, request, jsonify
 import socket
 import json

@@ -7,28 +7,72 @@ import requests
 app = Flask(__name__)
 backendServer = 'http://localhost:11000/api/v1/sync/request'
 
+# Globally declared dictionary for storing the payload of the air conditioner instance
 payload = {
-            "trigger": False,
-            "mode": "modeCooling",
-            "airflowDirect": True,
-            "fanSpeed": 5,
-            "brightnessScreen": 0,
-            "objTemperature": -1,
-            "startWakeupTimer": False,
-            "startShutdownTimer": True,
-            "stopWakeupTimer": False,
-            "stopShutdownTimer": False,
-            "wakeupTime": -1,
-            "shutdownTime": -1
+            "trigger": None,
+            "mode": None,
+            "airflowDirect": None,
+            "fanSpeed": None,
+            "brightnessScreen": None,
+            "objTemperature": None,
+            "startWakeupTimer": None,
+            "startShutdownTimer": None,
+            "stopWakeupTimer": None,
+            "stopShutdownTimer": None,
+            "wakeupTime": None,
+            "shutdownTime": None
 }
 
-# Extract action.parameters
+# Function to extract action.parameters(parameters required for response)
 def save_action_parameters(request_data):
     parameters = {}
     action_parameters = request_data.get('action', {}).get('parameters', {})
     for key, value in action_parameters.items():
         parameters[key] = value
     return parameters
+
+# Function for assigning proper values
+# This function must always be executed first
+@app.route('/action.aircon_turn_on', methods=['POST'])
+def aircon_turn_on():
+    try:
+        # Extract parameters from request_data
+        request_data = request.get_json()
+        action_parameters = save_action_parameters(request_data)
+        init_temp_parameters = action_parameters.get('initTemp', {})
+
+        # Assign proper values
+        payload["trigger"] = True
+        payload["mode"] = "modeCooling"
+        payload["airflowDirect"] = True
+        payload["fanSpeed"] = 5
+        payload["brightnessScreen"] = 10
+        payload["objTemperature"] = 18
+        payload["startWakeupTimer"] = False
+        payload["startShutdownTimer"] = False
+        payload["stopWakeupTimer"] = False
+        payload["stopShutdownTimer"] = False
+        payload["wakeupTime"] = -1
+        payload["shutdownTime"] = -1
+        
+        # Send message via HTTP request to backend server
+        try:
+            response = requests.post(backendServer, json=payload)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to connect backend server: {str(e)}")
+        
+        # Send response back to NUGU server
+        output_dict = {'initTemp': str(init_temp_parameters['value'])}
+        response_data = {
+            "version": "2.0",
+            "resultCode": "OK",
+            "output": output_dict
+        }
+        response_data = json.dumps(response_data, indent=2)
+        return response_data
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/action.aircon_change_airflow_direct', methods=['POST'])
 def aircon_change_airflow_direct():
@@ -296,45 +340,6 @@ def aircon_stop_wakeup_timer():
             "version": "2.0",
             "resultCode": "OK",
             "output": {}
-        }
-        response_data = json.dumps(response_data, indent=2)
-        return response_data
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-@app.route('/action.aircon_turn_on', methods=['POST'])
-def aircon_turn_on():
-    try:
-        # Extract parameters from request_data
-        request_data = request.get_json()
-        action_parameters = save_action_parameters(request_data)
-        init_temp_parameters = action_parameters.get('initTemp', {})
-
-        payload["trigger"] = True
-        payload["mode"] = "modeCooling"
-        payload["airflowDirect"] = True
-        payload["fanSpeed"] = 5
-        payload["brightnessScreen"] = 10
-        payload["objTemperature"] = 18
-        payload["startWakeupTimer"] = False
-        payload["startShutdownTimer"] = False
-        payload["stopWakeupTimer"] = False
-        payload["stopShutdownTimer"] = False
-        payload["wakeupTime"] = -1
-        payload["shutdownTime"] = -1
-        
-        # Send message via HTTP request to backend server
-        try:
-            response = requests.post(backendServer, json=payload)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            print(f"Failed to connect backend server: {str(e)}")
-        
-        output_dict = {'initTemp': str(init_temp_parameters['value'])}
-        response_data = {
-            "version": "2.0",
-            "resultCode": "OK",
-            "output": output_dict
         }
         response_data = json.dumps(response_data, indent=2)
         return response_data
