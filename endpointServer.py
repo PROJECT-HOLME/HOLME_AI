@@ -7,8 +7,9 @@ import requests
 app = Flask(__name__)
 backendServer = 'http://localhost:11000/api/v1/sync/request'
 
-# Globally declared dictionary for storing the payload of the air conditioner instance
-payload = {
+# Globally declared dictionary for storing the aircon_payload
+aircon_payload = {
+            "InstanceType": 3,
             "trigger": None,
             "mode": None,
             "airflowDirect": None,
@@ -42,22 +43,22 @@ def aircon_turn_on():
         init_temp_parameters = action_parameters.get('initTemp', {})
 
         # Assign proper values
-        payload["trigger"] = True
-        payload["mode"] = "modeCooling"
-        payload["airflowDirect"] = True
-        payload["fanSpeed"] = 5
-        payload["brightnessScreen"] = 10
-        payload["objTemperature"] = 18
-        payload["startWakeupTimer"] = False
-        payload["startShutdownTimer"] = False
-        payload["stopWakeupTimer"] = False
-        payload["stopShutdownTimer"] = False
-        payload["wakeupTime"] = -1
-        payload["shutdownTime"] = -1
+        aircon_payload["trigger"] = True
+        aircon_payload["mode"] = "modeCooling"
+        aircon_payload["airflowDirect"] = True
+        aircon_payload["fanSpeed"] = 5
+        aircon_payload["brightnessScreen"] = 10
+        aircon_payload["objTemperature"] = 18
+        aircon_payload["startWakeupTimer"] = False
+        aircon_payload["startShutdownTimer"] = False
+        aircon_payload["stopWakeupTimer"] = False
+        aircon_payload["stopShutdownTimer"] = False
+        aircon_payload["wakeupTime"] = -1
+        aircon_payload["shutdownTime"] = -1
         
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=payload)
+            response = requests.post(backendServer, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -77,11 +78,11 @@ def aircon_turn_on():
 @app.route('/action.aircon_change_airflow_direct', methods=['POST'])
 def aircon_change_airflow_direct():
     try:
-        payload["airflowDirect"] = True
+        aircon_payload["airflowDirect"] = True
         
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=payload)
+            response = requests.post(backendServer, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -99,10 +100,10 @@ def aircon_change_airflow_direct():
 @app.route('/action.aircon_change_airflow_indirect', methods=['POST'])
 def aircon_change_airflow_indirect():
     try:
-        payload["airflowDirect"] = False 
+        aircon_payload["airflowDirect"] = False 
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=payload)
+            response = requests.post(backendServer, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -125,11 +126,11 @@ def aircon_change_mode():
         action_parameters = save_action_parameters(request_data)
         airconMode_parameters = action_parameters.get('airconMode', {})
         
-        payload["mode"] = airconMode_parameters['value']
+        aircon_payload["mode"] = airconMode_parameters['value']
        
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=payload)
+            response = requests.post(backendServer, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -153,11 +154,11 @@ def aircon_change_fan_speed():
         action_parameters = save_action_parameters(request_data)
         fanSpeed_parameters = action_parameters.get('fanSpeed', {})
 
-        payload["fanSpeed"] = fanSpeed_parameters['value']
+        aircon_payload["fanSpeed"] = fanSpeed_parameters['value']
         
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=payload)
+            response = requests.post(backendServer, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -181,11 +182,11 @@ def aircon_change_screen_brightness():
         action_parameters = save_action_parameters(request_data)
         screen_brightness_parameters = action_parameters.get('screenBrightness', {})
         
-        payload["brightnessScreen"] = screen_brightness_parameters['value']
+        aircon_payload["brightnessScreen"] = screen_brightness_parameters['value']
             
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=payload)
+            response = requests.post(backendServer, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -209,11 +210,11 @@ def aircon_change_temp():
         action_parameters = save_action_parameters(request_data)
         setTemp_parameters = action_parameters.get('setTemp', {})
 
-        payload["objTemperature"] = setTemp_parameters['value']
+        aircon_payload["objTemperature"] = setTemp_parameters['value']
 
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=payload)
+            response = requests.post(backendServer, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -252,12 +253,12 @@ def aircon_shut_down_timer():
         action_parameters = save_action_parameters(request_data)
         shut_down_parameters = action_parameters.get('shutdownHour', {})
 
-        payload["startShutdownTimer"] = True
-        payload["shutdownTime"] = shut_down_parameters['value']
+        aircon_payload["startShutdownTimer"] = True
+        aircon_payload["shutdownTime"] = shut_down_parameters['value']
     
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=payload)
+            response = requests.post(backendServer, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -276,22 +277,22 @@ def aircon_shut_down_timer():
 @app.route('/action.aircon_stop_shut_down_timer', methods=['POST'])
 def aircon_stop_shut_down_timer():
     try:
-        payload["stopShutdownTimer"] = True
+        aircon_payload["stopShutdownTimer"] = True
 
-            # Send message via HTTP request to backend server
+        # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=payload)
+            response = requests.post(backendServer, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
-
-            response_data = {
-                "version": "2.0",
-                "resultCode": "OK",
-                "output": {}
-            }
-            response_data = json.dumps(response_data, indent=2)
-            return response_data
+    
+        response_data = {
+            "version": "2.0",
+            "resultCode": "OK",
+            "output": {}
+        }
+        response_data = json.dumps(response_data, indent=2)
+        return response_data
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
@@ -303,12 +304,12 @@ def aircon_wakeup_timer():
         action_parameters = save_action_parameters(request_data)
         wake_up_parameters = action_parameters.get('wakeupHour', {})
 
-        payload["startWakeupTimer"] = True
-        payload["wakeupTime"] = wake_up_parameters['value']
+        aircon_payload["startWakeupTimer"] = True
+        aircon_payload["wakeupTime"] = wake_up_parameters['value']
 
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=payload)
+            response = requests.post(backendServer, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -327,11 +328,11 @@ def aircon_wakeup_timer():
 @app.route('/action.aircon_stop_wakeup_timer', methods=['POST'])
 def aircon_stop_wakeup_timer():
     try:
-        payload["stopWakeupTimer"] = True
+        aircon_payload["stopWakeupTimer"] = True
 
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=payload)
+            response = requests.post(backendServer, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -349,11 +350,11 @@ def aircon_stop_wakeup_timer():
 @app.route('/action.aircon_turn_off', methods=['POST'])
 def aircon_turn_off():
     try:
-        payload["trigger"] = False
+        aircon_payload["trigger"] = False
         
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=payload)
+            response = requests.post(backendServer, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
