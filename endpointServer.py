@@ -32,8 +32,8 @@ def save_action_parameters(request_data):
         parameters[key] = value
     return parameters
 
-# Function for assigning proper values
-# This function must always be executed first
+# Function for assigning proper values to aricon_payload
+# For the aircon instance, this function must always be executed first
 @app.route('/action.aircon_turn_on', methods=['POST'])
 def aircon_turn_on():
     try:
@@ -48,7 +48,7 @@ def aircon_turn_on():
         aircon_payload["airflowDirect"] = True
         aircon_payload["fanSpeed"] = 5
         aircon_payload["brightnessScreen"] = 10
-        aircon_payload["objTemperature"] = 18
+        aircon_payload["objTemperature"] = init_temp_parameters["value"]
         aircon_payload["startWakeupTimer"] = False
         aircon_payload["startShutdownTimer"] = False
         aircon_payload["stopWakeupTimer"] = False
@@ -69,6 +69,135 @@ def aircon_turn_on():
             "version": "2.0",
             "resultCode": "OK",
             "output": output_dict
+        }
+        response_data = json.dumps(response_data, indent=2)
+        return response_data
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+# Funtion that asks whether to replace the soundbar or not
+@app.route('/action.ai_speaker_play_music', methods=['POST'])
+def ai_speaker_play_music():
+    try:
+        ai_speaker_payload = {
+            "InstanceType": 9,
+            "trigger": True,
+            "askForReplacement": True,
+            "replacement": False
+        }
+        
+        # Send message via HTTP request to backend server
+        try:
+            response = requests.post(backendServer, json=ai_speaker_payload)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to connect backend server: {str(e)}")
+
+        response_data = {
+            "version": "2.0",
+            "resultCode": "OK",
+            "output": {}
+        }
+        response_data = json.dumps(response_data, indent=2)
+        return response_data
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
+# Function to be executed when user wants replacement from AI speaker to soundbar
+# Sends requests twice(once to AI speaker, another to soundbar)
+@app.route('/action.ai_speaker_play_music_yes', methods=['POST'])
+def ai_speaker_play_music_yes():
+    try:
+        ai_speaker_payload = {
+            "InstanceType": 9,
+            "trigger": True,
+            "askForReplacement": False,
+            "replacement": True
+        }
+        soundbar_payload = {
+            "InstanceType": 7,
+            "trigger": True
+        }
+        
+        # Send message via HTTP request to backend server
+        try:
+            response = requests.post(backendServer, json=ai_speaker_payload)
+            response.raise_for_status()
+
+            response = requests.post(backendServer, json=soundbar_payload)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to connect backend server: {str(e)}")
+
+        response_data = {
+            "version": "2.0",
+            "resultCode": "OK",
+            "output": {}
+        }
+        response_data = json.dumps(response_data, indent=2)
+        return response_data
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
+# Function to be executed when user wants to stop the music
+# Sends requests twice(once to AI speaker, another to soundbar)
+@app.route('/action.ai_speaker_stop_music', methods=['POST'])
+def ai_speaker_stop_music():
+    try:
+        ai_speaker_payload = {
+            "InstanceType": 9,
+            "trigger": False,
+            "askForReplacement": False,
+            "replacement": False
+        }
+        soundbar_payload = {
+            "InstanceType": 7,
+            "trigger": False
+        }
+        
+        # Send message via HTTP request to backend server
+        try:
+            response = requests.post(backendServer, json=ai_speaker_payload)
+            response.raise_for_status()
+
+            response = requests.post(backendServer, json=soundbar_payload)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to connect backend server: {str(e)}")
+
+        response_data = {
+            "version": "2.0",
+            "resultCode": "OK",
+            "output": {}
+        }
+        response_data = json.dumps(response_data, indent=2)
+        return response_data
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
+# Function to be executed when user does not want replacement
+@app.route('/action.ai_speaker_play_music_no', methods=['POST'])
+@app.route('/action.ai_speaker_play_music_default', methods=['POST'])
+def ai_speaker_play_music_no():
+    try:
+        ai_speaker_payload = {
+            "InstanceType": 9,
+            "trigger": True,
+            "askForReplacement": False,
+            "replacement": False
+        }
+        
+        # Send message via HTTP request to backend server
+        try:
+            response = requests.post(backendServer, json=ai_speaker_payload)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to connect backend server: {str(e)}")
+
+        response_data = {
+            "version": "2.0",
+            "resultCode": "OK",
+            "output": {}
         }
         response_data = json.dumps(response_data, indent=2)
         return response_data
@@ -278,6 +407,7 @@ def aircon_shut_down_timer():
 def aircon_stop_shut_down_timer():
     try:
         aircon_payload["stopShutdownTimer"] = True
+        aircon_payload["shutdownTime"] = -1
 
         # Send message via HTTP request to backend server
         try:
@@ -329,6 +459,7 @@ def aircon_wakeup_timer():
 def aircon_stop_wakeup_timer():
     try:
         aircon_payload["stopWakeupTimer"] = True
+        aircon_payload["wakeupTime"] = -1
 
         # Send message via HTTP request to backend server
         try:
