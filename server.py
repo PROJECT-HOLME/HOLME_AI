@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify
-from socket import *
 import json
 import random
 import requests
@@ -475,6 +474,7 @@ def aircon_stop_wakeup_timer():
         }
         response_data = json.dumps(response_data, indent=2)
         return response_data
+        
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
