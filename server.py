@@ -122,9 +122,6 @@ def ai_speaker_play_music_yes():
         try:
             response = requests.post(backendServer, json=ai_speaker_payload)
             response.raise_for_status()
-
-            response = requests.post(backendServer, json=soundbar_payload)
-            response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
 
@@ -158,9 +155,6 @@ def ai_speaker_stop_music():
         try:
             response = requests.post(backendServer, json=ai_speaker_payload)
             response.raise_for_status()
-
-            response = requests.post(backendServer, json=soundbar_payload)
-            response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
 
@@ -188,8 +182,6 @@ def water_dispenser_hotel():
             response = requests.post(backendServer, json=water_dispenser_payload)
             response.raise_for_status()
 
-            response = requests.post(backendServer, json=water_dispenser_payload)
-            response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
 
@@ -217,8 +209,6 @@ def water_dispenser_hotel_yes():
             response = requests.post(backendServer, json=water_dispenser_payload)
             response.raise_for_status()
 
-            response = requests.post(backendServer, json=water_dispenser_payload)
-            response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
 
