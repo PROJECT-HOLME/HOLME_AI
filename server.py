@@ -174,6 +174,64 @@ def ai_speaker_stop_music():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
     
+@app.route('/action.ai_speaker_feed_routine_hotel', methods=['POST'])
+def water_dispenser_hotel():
+    try:
+        water_dispenser_payload = {
+            "InstanceType": 5,
+            "triggerReminder": True,
+            "triggerWater": False
+        }
+        
+        # Send message via HTTP request to backend server
+        try:
+            response = requests.post(backendServer, json=water_dispenser_payload)
+            response.raise_for_status()
+
+            response = requests.post(backendServer, json=water_dispenser_payload)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to connect backend server: {str(e)}")
+
+        response_data = {
+            "version": "2.0",
+            "resultCode": "OK",
+            "output": {}
+        }
+        response_data = json.dumps(response_data, indent=2)
+        return response_data
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/action.ai_speaker_feed_routine_hotel_yes', methods=['POST'])
+def water_dispenser_hotel_yes():
+    try:
+        water_dispenser_payload = {
+            "InstanceType": 5,
+            "triggerReminder": True,
+            "triggerWater": True
+        }
+        
+        # Send message via HTTP request to backend server
+        try:
+            response = requests.post(backendServer, json=water_dispenser_payload)
+            response.raise_for_status()
+
+            response = requests.post(backendServer, json=water_dispenser_payload)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to connect backend server: {str(e)}")
+
+        response_data = {
+            "version": "2.0",
+            "resultCode": "OK",
+            "output": {}
+        }
+        response_data = json.dumps(response_data, indent=2)
+        return response_data
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 # Function to be executed when user does not want replacement
 @app.route('/action.ai_speaker_play_music_no', methods=['POST'])
 @app.route('/action.ai_speaker_play_music_default', methods=['POST'])
