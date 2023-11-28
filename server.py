@@ -8,19 +8,23 @@ backendServer = 'http://localhost:11000/api/v1/sync/request'
 
 # Globally declared dictionary for storing the aircon_payload
 aircon_payload = {
-            "InstanceType": 3,
-            "trigger": None,
-            "mode": None,
-            "airflowDirect": None,
-            "fanSpeed": None,
-            "brightnessScreen": None,
-            "objTemperature": None,
-            "startWakeupTimer": None,
-            "startShutdownTimer": None,
-            "stopWakeupTimer": None,
-            "stopShutdownTimer": None,
-            "wakeupTime": None,
-            "shutdownTime": None
+    'user': 'Kang',
+    'connectedDevice': [],
+    'payload': {
+        "InstanceType": 3,
+        "trigger": None,
+        "mode": None,
+        "airflowDirect": None,
+        "fanSpeed": None,
+        "brightnessScreen": None,
+        "objTemperature": None,
+        "startWakeupTimer": None,
+        "startShutdownTimer": None,
+        "stopWakeupTimer": None,
+        "stopShutdownTimer": None,
+        "wakeupTime": None,
+        "shutdownTime": None
+    }
 }
 
 # Function to extract action.parameters(parameters required for response)
@@ -35,6 +39,7 @@ def save_action_parameters(request_data):
 # For the aircon instance, this function must always be executed first
 @app.route('/action.aircon_turn_on', methods=['POST'])
 def aircon_turn_on():
+    global aircon_payload
     try:
         # Extract parameters from request_data
         request_data = request.get_json()
@@ -42,18 +47,18 @@ def aircon_turn_on():
         init_temp_parameters = action_parameters.get('initTemp', {})
 
         # Assign proper values
-        aircon_payload["trigger"] = True
-        aircon_payload["mode"] = "modeCooling"
-        aircon_payload["airflowDirect"] = True
-        aircon_payload["fanSpeed"] = 5
-        aircon_payload["brightnessScreen"] = 10
-        aircon_payload["objTemperature"] = init_temp_parameters["value"]
-        aircon_payload["startWakeupTimer"] = False
-        aircon_payload["startShutdownTimer"] = False
-        aircon_payload["stopWakeupTimer"] = False
-        aircon_payload["stopShutdownTimer"] = False
-        aircon_payload["wakeupTime"] = -1
-        aircon_payload["shutdownTime"] = -1
+        aircon_payload["payload"]["trigger"] = True
+        aircon_payload["payload"]["mode"] = "modeCooling"
+        aircon_payload["payload"]["airflowDirect"] = True
+        aircon_payload["payload"]["fanSpeed"] = 5
+        aircon_payload["payload"]["brightnessScreen"] = 10
+        aircon_payload["payload"]["objTemperature"] = init_temp_parameters["value"]
+        aircon_payload["payload"]["startWakeupTimer"] = False
+        aircon_payload["payload"]["startShutdownTimer"] = False
+        aircon_payload["payload"]["stopWakeupTimer"] = False
+        aircon_payload["payload"]["stopShutdownTimer"] = False
+        aircon_payload["payload"]["wakeupTime"] = -1
+        aircon_payload["payload"]["shutdownTime"] = -1
         
         # Send message via HTTP request to backend server
         try:
@@ -253,8 +258,9 @@ def ai_speaker_play_music_no():
 
 @app.route('/action.aircon_change_airflow_direct', methods=['POST'])
 def aircon_change_airflow_direct():
+    global aircon_payload
     try:
-        aircon_payload["airflowDirect"] = True
+        aircon_payload["payload"]["airflowDirect"] = True
         
         # Send message via HTTP request to backend server
         try:
@@ -275,8 +281,9 @@ def aircon_change_airflow_direct():
     
 @app.route('/action.aircon_change_airflow_indirect', methods=['POST'])
 def aircon_change_airflow_indirect():
+    global aircon_payload
     try:
-        aircon_payload["airflowDirect"] = False 
+        aircon_payload["payload"]["airflowDirect"] = False 
         # Send message via HTTP request to backend server
         try:
             response = requests.post(backendServer, json=aircon_payload)
@@ -296,13 +303,14 @@ def aircon_change_airflow_indirect():
 
 @app.route('/action.aircon_change_mode', methods=['POST'])
 def aircon_change_mode():
+    global aircon_payload
     try:
         # Extract parameters from request_data
         request_data = request.get_json()
         action_parameters = save_action_parameters(request_data)
         airconMode_parameters = action_parameters.get('airconMode', {})
         
-        aircon_payload["mode"] = airconMode_parameters['value']
+        aircon_payload["payload"]["mode"] = airconMode_parameters['value']
        
         # Send message via HTTP request to backend server
         try:
@@ -324,13 +332,14 @@ def aircon_change_mode():
 
 @app.route('/action.aircon_change_fan_speed', methods=['POST'])
 def aircon_change_fan_speed():
+    global aircon_payload
     try:
         # Extract parameters from request_data
         request_data = request.get_json()
         action_parameters = save_action_parameters(request_data)
         fanSpeed_parameters = action_parameters.get('fanSpeed', {})
 
-        aircon_payload["fanSpeed"] = fanSpeed_parameters['value']
+        aircon_payload["payload"]["fanSpeed"] = fanSpeed_parameters['value']
         
         # Send message via HTTP request to backend server
         try:
@@ -352,13 +361,14 @@ def aircon_change_fan_speed():
 
 @app.route('/action.aircon_change_screen_brightness', methods=['POST'])
 def aircon_change_screen_brightness():
+    global aircon_payload
     try:
          # Extract parameters from request_data
         request_data = request.get_json()
         action_parameters = save_action_parameters(request_data)
         screen_brightness_parameters = action_parameters.get('screenBrightness', {})
         
-        aircon_payload["brightnessScreen"] = screen_brightness_parameters['value']
+        aircon_payload["payload"]["brightnessScreen"] = screen_brightness_parameters['value']
             
         # Send message via HTTP request to backend server
         try:
@@ -380,13 +390,14 @@ def aircon_change_screen_brightness():
 
 @app.route('/action.aircon_change_temp', methods=['POST'])
 def aircon_change_temp():
+    global aircon_payload
     try:
          # Extract parameters from request_data
         request_data = request.get_json()
         action_parameters = save_action_parameters(request_data)
         setTemp_parameters = action_parameters.get('setTemp', {})
 
-        aircon_payload["objTemperature"] = setTemp_parameters['value']
+        aircon_payload["payload"]["objTemperature"] = setTemp_parameters['value']
 
         # Send message via HTTP request to backend server
         try:
@@ -408,6 +419,7 @@ def aircon_change_temp():
 
 @app.route('/action.aircon_check_cur_temp', methods=['POST'])
 def aircon_check_cur_temp():
+    global aircon_payload
     try:
         # Extract parameters from request_data
         output_dict = {'curTemp': str(round(random.uniform(18.0, 30.0), 1))} 
@@ -423,14 +435,15 @@ def aircon_check_cur_temp():
 
 @app.route('/action.aircon_shut_down_timer', methods=['POST'])
 def aircon_shut_down_timer():
+    global aircon_payload
     try:
         # Extract parameters from request_data
         request_data = request.get_json()
         action_parameters = save_action_parameters(request_data)
         shut_down_parameters = action_parameters.get('shutdownHour', {})
 
-        aircon_payload["startShutdownTimer"] = True
-        aircon_payload["shutdownTime"] = shut_down_parameters['value']
+        aircon_payload["payload"]["startShutdownTimer"] = True
+        aircon_payload["payload"]["shutdownTime"] = shut_down_parameters['value']
     
         # Send message via HTTP request to backend server
         try:
@@ -452,9 +465,10 @@ def aircon_shut_down_timer():
 
 @app.route('/action.aircon_stop_shut_down_timer', methods=['POST'])
 def aircon_stop_shut_down_timer():
+    global aircon_payload
     try:
-        aircon_payload["stopShutdownTimer"] = True
-        aircon_payload["shutdownTime"] = -1
+        aircon_payload["payload"]["stopShutdownTimer"] = True
+        aircon_payload["payload"]["shutdownTime"] = -1
 
         # Send message via HTTP request to backend server
         try:
@@ -475,14 +489,15 @@ def aircon_stop_shut_down_timer():
 
 @app.route('/action.aircon_wakeup_timer', methods=['POST'])
 def aircon_wakeup_timer():
+    global aircon_payload
     try:
         # Extract parameters from request_data
         request_data = request.get_json()
         action_parameters = save_action_parameters(request_data)
         wake_up_parameters = action_parameters.get('wakeupHour', {})
 
-        aircon_payload["startWakeupTimer"] = True
-        aircon_payload["wakeupTime"] = wake_up_parameters['value']
+        aircon_payload["payload"]["startWakeupTimer"] = True
+        aircon_payload["payload"]["wakeupTime"] = wake_up_parameters['value']
 
         # Send message via HTTP request to backend server
         try:
@@ -504,9 +519,10 @@ def aircon_wakeup_timer():
 
 @app.route('/action.aircon_stop_wakeup_timer', methods=['POST'])
 def aircon_stop_wakeup_timer():
+    global aircon_payload
     try:
-        aircon_payload["stopWakeupTimer"] = True
-        aircon_payload["wakeupTime"] = -1
+        aircon_payload["payload"]["stopWakeupTimer"] = True
+        aircon_payload["payload"]["wakeupTime"] = -1
 
         # Send message via HTTP request to backend server
         try:
@@ -528,8 +544,9 @@ def aircon_stop_wakeup_timer():
 
 @app.route('/action.aircon_turn_off', methods=['POST'])
 def aircon_turn_off():
+    global aircon_payload
     try:
-        aircon_payload["trigger"] = False
+        aircon_payload["payload"]["trigger"] = False
         
         # Send message via HTTP request to backend server
         try:
