@@ -84,6 +84,58 @@ def aircon_turn_on():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/action.ai_speaker_nap_routine_hotel_yes', methods=['POST'])
+def nap_routine():
+    try:
+        nap_routine_payload = {
+            'user': 'Kang',
+            'connectedDevices': [],
+            'payloads': [
+                {
+                    "instanceType": 1, 
+                    "payload":{
+                        "trigger": True,
+                        "degree": 0,
+                        "color": "white"
+                    }
+                },
+
+                {
+                    "instanceType": 2,
+                    "payload":{
+                        "isHorizontal": False,
+		                "isCenterMode": False,
+		                "isLeftOrTop": False,
+		                "degree": 100
+                    }
+                },
+
+                {
+                    "instanceType": 6,
+                    "payload":{
+                        "trigger": False
+                    }
+                }
+           ]
+        }
+        
+        # Send message via HTTP request to backend server
+        try:
+            response = requests.post(backendServerSync, json=nap_routine_payload)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to connect backend server: {str(e)}")
+
+        response_data = {
+            "version": "2.0",
+            "resultCode": "OK",
+            "output": {}
+        }
+        response_data = json.dumps(response_data, indent=2)
+        return response_data
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 # Funtion that asks whether to replace the soundbar or not
 @app.route('/action.ai_speaker_play_music', methods=['POST'])
 def ai_speaker_play_music():
