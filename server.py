@@ -199,21 +199,20 @@ def ai_speaker_stop_music():
 @app.route('/action.ai_speaker_feed_routine_hotel', methods=['POST'])
 def water_dispenser_hotel():
     try:
-        water_dispenser_payload = {
+        pet_feeder_payload = {
             'user': 'Kang',
             'connectedDevices': [],
             'payloads': [{
-                "instanceType": 5,
+                "instanceType": 10,
                 "payload":{
-                    "triggerReminder": True,
-                    "triggerWater": False
+                    
                 }
            }]
         }
 
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServerSync, json=water_dispenser_payload)
+            response = requests.post(backendServerSync, json=pet_feeder_payload)
             response.raise_for_status()
 
         except requests.exceptions.RequestException as e:
