@@ -206,7 +206,7 @@ def water_dispenser_hotel():
             'payloads': [{
                 "instanceType": 10,
                 "payload":{
-                    
+                    "trigger" : True
                 }
            }]
         }
