@@ -4,27 +4,30 @@ import random
 import requests
 
 app = Flask(__name__)
-backendServer = 'http://localhost:11000/api/v1/sync/request'
+backendServerSync = 'https://53a2-211-36-146-73.ngrok-free.app/api/v1/sync/request?type=sync'
+backendServerUpgr = 'http://localhost:11000/api/v1/sync/request?type=upgr'
 
 # Globally declared dictionary for storing the aircon_payload
 aircon_payload = {
     'user': 'Kang',
-    'connectedDevice': [],
-    'payload': {
-        "InstanceType": 3,
-        "trigger": None,
-        "mode": None,
-        "airflowDirect": None,
-        "fanSpeed": None,
-        "brightnessScreen": None,
-        "objTemperature": None,
-        "startWakeupTimer": None,
-        "startShutdownTimer": None,
-        "stopWakeupTimer": None,
-        "stopShutdownTimer": None,
-        "wakeupTime": None,
-        "shutdownTime": None
-    }
+    'connectedDevices': [],
+    'payloads': [{
+        "instanceType": 3,
+        "payload":{
+            "trigger": None,
+            "mode": None,
+            "airflowDirect": None,
+            "fanSpeed": None,
+            "brightnessScreen": None,
+            "objTemperature": None,
+            "startWakeupTimer": None,
+            "startShutdownTimer": None,
+            "stopWakeupTimer": None,
+            "stopShutdownTimer": None,
+            "wakeupTime": None,
+            "shutdownTime": None
+        }
+    }]
 }
 
 # Function to extract action.parameters(parameters required for response)
@@ -47,26 +50,27 @@ def aircon_turn_on():
         init_temp_parameters = action_parameters.get('initTemp', {})
 
         # Assign proper values
-        aircon_payload["payload"]["trigger"] = True
-        aircon_payload["payload"]["mode"] = "modeCooling"
-        aircon_payload["payload"]["airflowDirect"] = True
-        aircon_payload["payload"]["fanSpeed"] = 5
-        aircon_payload["payload"]["brightnessScreen"] = 10
-        aircon_payload["payload"]["objTemperature"] = init_temp_parameters["value"]
-        aircon_payload["payload"]["startWakeupTimer"] = False
-        aircon_payload["payload"]["startShutdownTimer"] = False
-        aircon_payload["payload"]["stopWakeupTimer"] = False
-        aircon_payload["payload"]["stopShutdownTimer"] = False
-        aircon_payload["payload"]["wakeupTime"] = -1
-        aircon_payload["payload"]["shutdownTime"] = -1
-        
+        aircon_payload["payloads"][0]["payload"]["trigger"] = True
+        aircon_payload["payloads"][0]["payload"]["mode"] = "modeCooling"
+        aircon_payload["payloads"][0]["payload"]["airflowDirect"] = True
+        aircon_payload["payloads"][0]["payload"]["fanSpeed"] = 5
+        aircon_payload["payloads"][0]["payload"]["brightnessScreen"] = 10
+        aircon_payload["payloads"][0]["payload"]["objTemperature"] = init_temp_parameters["value"]
+        aircon_payload["payloads"][0]["payload"]["startWakeupTimer"] = False
+        aircon_payload["payloads"][0]["payload"]["startShutdownTimer"] = False
+        aircon_payload["payloads"][0]["payload"]["stopWakeupTimer"] = False
+        aircon_payload["payloads"][0]["payload"]["stopShutdownTimer"] = False
+        aircon_payload["payloads"][0]["payload"]["wakeupTime"] = -1
+        aircon_payload["payloads"][0]["payload"]["shutdownTime"] = -1
+
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=aircon_payload)
+            print(aircon_payload)
+            response = requests.post(backendServerSync, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
-        
+
         # Send response back to NUGU server
         output_dict = {'initTemp': str(init_temp_parameters['value'])}
         response_data = {
@@ -84,15 +88,21 @@ def aircon_turn_on():
 def ai_speaker_play_music():
     try:
         ai_speaker_payload = {
-            "InstanceType": 9,
-            "trigger": True,
-            "askForReplacement": True,
-            "replacement": False
+            'user': 'Kang',
+            'connectedDevices': [],
+            'payloads': [{
+                "instanceType": 9,
+                "payload":{
+                    "trigger": True,
+                    "askForReplacement": True,
+                    "replacement": False
+                }
+           }]
         }
         
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=ai_speaker_payload)
+            response = requests.post(backendServerSync, json=ai_speaker_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -112,20 +122,31 @@ def ai_speaker_play_music():
 @app.route('/action.ai_speaker_play_music_yes', methods=['POST'])
 def ai_speaker_play_music_yes():
     try:
-        ai_speaker_payload = {
-            "InstanceType": 9,
-            "trigger": True,
-            "askForReplacement": False,
-            "replacement": True
+        play_music_payload = {
+            'user': 'Kang',
+            'connectedDevices': [],
+            'payloads': [
+                {
+                    "instanceType": 9,
+                    "payload":{
+                        "trigger": True,
+                        "askForReplacement": False,
+                        "replacement": True
+                    }
+                },
+
+                {
+                    "instanceType": 7,
+                    "payload":{
+                        "trigger": True
+                    }
+                }
+            ]
         }
-        soundbar_payload = {
-            "InstanceType": 7,
-            "trigger": True
-        }
-        
+
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=ai_speaker_payload)
+            response = requests.post(backendServerUpgr, json=play_music_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -146,19 +167,21 @@ def ai_speaker_play_music_yes():
 def ai_speaker_stop_music():
     try:
         ai_speaker_payload = {
-            "InstanceType": 9,
-            "trigger": False,
-            "askForReplacement": False,
-            "replacement": False
-        }
-        soundbar_payload = {
-            "InstanceType": 7,
-            "trigger": False
+            'user': 'Kang',
+            'connectedDevices': [],
+            'payloads': [{
+                "instanceType": 9,
+                "payload":{
+                    "trigger": False,
+                    "askForReplacement": False,
+                    "replacement": False
+                }
+           }]
         }
         
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=ai_speaker_payload)
+            response = requests.post(backendServerSync, json=ai_speaker_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -177,14 +200,20 @@ def ai_speaker_stop_music():
 def water_dispenser_hotel():
     try:
         water_dispenser_payload = {
-            "InstanceType": 5,
-            "triggerReminder": True,
-            "triggerWater": False
+            'user': 'Kang',
+            'connectedDevices': [],
+            'payloads': [{
+                "instanceType": 5,
+                "payload":{
+                    "triggerReminder": True,
+                    "triggerWater": False
+                }
+           }]
         }
-        
+
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=water_dispenser_payload)
+            response = requests.post(backendServerSync, json=water_dispenser_payload)
             response.raise_for_status()
 
         except requests.exceptions.RequestException as e:
@@ -204,14 +233,20 @@ def water_dispenser_hotel():
 def water_dispenser_hotel_yes():
     try:
         water_dispenser_payload = {
-            "InstanceType": 5,
-            "triggerReminder": True,
-            "triggerWater": True
+            'user': 'Kang',
+            'connectedDevices': [],
+            'payloads': [{
+                "instanceType": 5,
+                "payload":{
+                    "triggerReminder": True,
+                    "triggerWater": True
+                }
+           }]
         }
         
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=water_dispenser_payload)
+            response = requests.post(backendServerSync, json=water_dispenser_payload)
             response.raise_for_status()
 
         except requests.exceptions.RequestException as e:
@@ -233,15 +268,21 @@ def water_dispenser_hotel_yes():
 def ai_speaker_play_music_no():
     try:
         ai_speaker_payload = {
-            "InstanceType": 9,
-            "trigger": True,
-            "askForReplacement": False,
-            "replacement": False
+            'user': 'Kang',
+            'connectedDevices': [],
+            'payloads': [{
+                "instanceType": 9,
+                "payload":{
+                    "trigger": True,
+                    "askForReplacement": False,
+                    "replacement": False
+                }
+           }]
         }
         
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=ai_speaker_payload)
+            response = requests.post(backendServerSync, json=ai_speaker_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -260,11 +301,11 @@ def ai_speaker_play_music_no():
 def aircon_change_airflow_direct():
     global aircon_payload
     try:
-        aircon_payload["payload"]["airflowDirect"] = True
+        aircon_payload["payloads"][0]["payload"]["airflowDirect"] = True
         
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=aircon_payload)
+            response = requests.post(backendServerSync, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -283,10 +324,10 @@ def aircon_change_airflow_direct():
 def aircon_change_airflow_indirect():
     global aircon_payload
     try:
-        aircon_payload["payload"]["airflowDirect"] = False 
+        aircon_payload["payloads"][0]["payload"]["airflowDirect"] = False 
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=aircon_payload)
+            response = requests.post(backendServerSync, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -310,11 +351,11 @@ def aircon_change_mode():
         action_parameters = save_action_parameters(request_data)
         airconMode_parameters = action_parameters.get('airconMode', {})
         
-        aircon_payload["payload"]["mode"] = airconMode_parameters['value']
+        aircon_payload["payloads"][0]["payload"]["mode"] = airconMode_parameters['value']
        
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=aircon_payload)
+            response = requests.post(backendServerSync, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -339,11 +380,11 @@ def aircon_change_fan_speed():
         action_parameters = save_action_parameters(request_data)
         fanSpeed_parameters = action_parameters.get('fanSpeed', {})
 
-        aircon_payload["payload"]["fanSpeed"] = fanSpeed_parameters['value']
+        aircon_payload["payloads"][0]["payload"]["fanSpeed"] = fanSpeed_parameters['value']
         
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=aircon_payload)
+            response = requests.post(backendServerSync, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -368,11 +409,11 @@ def aircon_change_screen_brightness():
         action_parameters = save_action_parameters(request_data)
         screen_brightness_parameters = action_parameters.get('screenBrightness', {})
         
-        aircon_payload["payload"]["brightnessScreen"] = screen_brightness_parameters['value']
+        aircon_payload["payloads"][0]["payload"]["brightnessScreen"] = screen_brightness_parameters['value']
             
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=aircon_payload)
+            response = requests.post(backendServerSync, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -397,11 +438,11 @@ def aircon_change_temp():
         action_parameters = save_action_parameters(request_data)
         setTemp_parameters = action_parameters.get('setTemp', {})
 
-        aircon_payload["payload"]["objTemperature"] = setTemp_parameters['value']
+        aircon_payload["payloads"][0]["payload"]["objTemperature"] = setTemp_parameters['value']
 
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=aircon_payload)
+            response = requests.post(backendServerSync, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -442,12 +483,12 @@ def aircon_shut_down_timer():
         action_parameters = save_action_parameters(request_data)
         shut_down_parameters = action_parameters.get('shutdownHour', {})
 
-        aircon_payload["payload"]["startShutdownTimer"] = True
-        aircon_payload["payload"]["shutdownTime"] = shut_down_parameters['value']
+        aircon_payload["payloads"][0]["payload"]["startShutdownTimer"] = True
+        aircon_payload["payloads"][0]["payload"]["shutdownTime"] = shut_down_parameters['value']
     
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=aircon_payload)
+            response = requests.post(backendServerSync, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -467,12 +508,12 @@ def aircon_shut_down_timer():
 def aircon_stop_shut_down_timer():
     global aircon_payload
     try:
-        aircon_payload["payload"]["stopShutdownTimer"] = True
-        aircon_payload["payload"]["shutdownTime"] = -1
+        aircon_payload["payloads"][0]["payload"]["stopShutdownTimer"] = True
+        aircon_payload["payloads"][0]["payload"]["shutdownTime"] = -1
 
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=aircon_payload)
+            response = requests.post(backendServerSync, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -496,12 +537,12 @@ def aircon_wakeup_timer():
         action_parameters = save_action_parameters(request_data)
         wake_up_parameters = action_parameters.get('wakeupHour', {})
 
-        aircon_payload["payload"]["startWakeupTimer"] = True
-        aircon_payload["payload"]["wakeupTime"] = wake_up_parameters['value']
+        aircon_payload["payloads"][0]["payload"]["startWakeupTimer"] = True
+        aircon_payload["payloads"][0]["payload"]["wakeupTime"] = wake_up_parameters['value']
 
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=aircon_payload)
+            response = requests.post(backendServerSync, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -521,12 +562,12 @@ def aircon_wakeup_timer():
 def aircon_stop_wakeup_timer():
     global aircon_payload
     try:
-        aircon_payload["payload"]["stopWakeupTimer"] = True
-        aircon_payload["payload"]["wakeupTime"] = -1
+        aircon_payload["payloads"][0]["payload"]["stopWakeupTimer"] = True
+        aircon_payload["payloads"][0]["payload"]["wakeupTime"] = -1
 
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=aircon_payload)
+            response = requests.post(backendServerSync, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
@@ -546,11 +587,11 @@ def aircon_stop_wakeup_timer():
 def aircon_turn_off():
     global aircon_payload
     try:
-        aircon_payload["payload"]["trigger"] = False
+        aircon_payload["payloads"][0]["payload"]["trigger"] = False
         
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServer, json=aircon_payload)
+            response = requests.post(backendServerSync, json=aircon_payload)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Failed to connect backend server: {str(e)}")
