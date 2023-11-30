@@ -6,6 +6,7 @@ import requests
 app = Flask(__name__)
 backendServerSync = 'https://53a2-211-36-146-73.ngrok-free.app/api/v1/sync/request?type=sync'
 backendServerUpgr = 'http://localhost:11000/api/v1/sync/request?type=upgr'
+backendServerRepl = 'http://localhost:11000/api/v1/sync/request?type=repl'
 
 # Globally declared dictionary for storing the aircon_payload
 aircon_payload = {
@@ -245,7 +246,7 @@ def water_dispenser_hotel_yes():
         
         # Send message via HTTP request to backend server
         try:
-            response = requests.post(backendServerSync, json=water_dispenser_payload)
+            response = requests.post(backendServerRepl, json=water_dispenser_payload)
             response.raise_for_status()
 
         except requests.exceptions.RequestException as e:
