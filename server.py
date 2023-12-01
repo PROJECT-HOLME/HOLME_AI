@@ -4,9 +4,10 @@ import random
 import requests
 
 app = Flask(__name__)
-backendServerSync = 'https://53a2-211-36-146-73.ngrok-free.app/api/v1/sync/request?type=sync'
-backendServerUpgr = 'http://localhost:11000/api/v1/sync/request?type=upgr'
-backendServerRepl = 'http://localhost:11000/api/v1/sync/request?type=repl'
+backendServer = 'https://53a2-211-36-146-73.ngrok-free.app'
+backendServerSync = backendServer + '/api/v1/sync/request?type=sync'
+backendServerUpgr = backendServer + '/api/v1/sync/request?type=upgr'
+backendServerRepl = backendServer + '/api/v1/sync/request?type=repl'
 
 # Globally declared dictionary for storing the aircon_payload
 aircon_payload = {
